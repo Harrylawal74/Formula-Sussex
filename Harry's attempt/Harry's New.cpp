@@ -3,6 +3,8 @@
 //
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
+#include TSA.cpp
+#include RTD.cpp
 
 // set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27,16,2);
@@ -11,6 +13,8 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 const int tsaButtonPin = 2;
 const int rtdButtonPin = 5;
 
+//ini kill switch
+bool kill = false;
 
 //variable for reading the TSA and RTD button states
 int tsaButtonState = 0;
@@ -22,8 +26,15 @@ void setup() {
     pinMode(tsaButtonPin, INPUT);
     pinMode(rtdButtonPin, INPUT);
 
+
+    //on/off of RTD and TSA 
+    bool RTD = digitalRead(0);
+    bool TSA = digitalRead(1);
+
     //---------LCD display-----------//
     // Set the cockpit display to the loading screen
+    Serial.begin(115200);
+    lcd.init();  // initialize the lcd
     delay(500);
     lcd.backlight();
     lcd.setCursor(0, 0);
@@ -42,33 +53,9 @@ void loop(){
     tsaButtonState = digitalRead(tsaButtonPin);
     rtdButtonState = digitalRead(rtdButtonPin);
 
-    // -----------------------------Outputs states of buttons
-    //if TSA is on then output "TSA on" to screen
-    if(tsaButtonState == HIGH) {
-        lcd.clear();
-        lcd.print("TSA on");
-        delay(500);
-    }
+    // -----------------------------Outputs state of TSA 
+    tsaStateCheck(tsaButtonState);
 
-    //if TSA is off then output "TSA off" to screen
-    else {
-        lcd.clear();
-        lcd.print("TSA off");
-        delay(500);
-    }
-
-    //if RTD is on then output "RTD on" to screen
-    if(rtdButtonState == HIGH) {
-        lcd.clear();
-        lcd.print("RTD on");
-        delay(500);
-    }
-
-    //if RTD is off then output "RTD off" to screen
-    else {
-        lcd.clear();
-        lcd.print("RTD off");
-        delay(500);
-    }
-    //--------------------------------------------------------------
+    // -----------------------------Outputs state of RTD 
+    rtdStateCheck(rtdButtonState);
 }
